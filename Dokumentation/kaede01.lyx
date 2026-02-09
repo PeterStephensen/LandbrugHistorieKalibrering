@@ -1,0 +1,169 @@
+#LyX 2.4 created this file. For more info see https://www.lyx.org/
+\lyxformat 620
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\begin_modules
+theorems-ams
+eqs-within-sections
+figs-within-sections
+\end_modules
+\maintain_unincluded_children no
+\language english
+\language_package default
+\inputencoding auto-legacy
+\fontencoding auto
+\font_roman "times" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_roman_osf false
+\font_sans_osf false
+\font_typewriter_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\float_placement class
+\float_alignment class
+\paperfontsize 12
+\spacing onehalf
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine natbib
+\cite_engine_type authoryear
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_formatted_ref 0
+\use_minted 0
+\use_lineno 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 2.5cm
+\topmargin 2.6cm
+\rightmargin 2.5cm
+\bottommargin 3cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tablestyle default
+\tracking_changes false
+\output_changes false
+\change_bars false
+\postpone_fragile_content false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\docbook_table_output 0
+\docbook_mathml_prefix 1
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+Antag at 
+\begin_inset Formula $X_{t}$
+\end_inset
+
+ er et aggregat af 
+\begin_inset Formula $x_{1t},..,x_{nt}$
+\end_inset
+
+ og at vi fra data har priser 
+\begin_inset Formula $p_{1t,..,nt}.$
+\end_inset
+
+ Antag at vi har et basis-år 
+\begin_inset Formula $t_{0}$
+\end_inset
+
+ hvor
+\begin_inset Formula 
+\[
+p_{jt_{0}}=1,\,j=1,..,n
+\]
+
+\end_inset
+
+For aggregatet 
+\begin_inset Formula $X_{t}$
+\end_inset
+
+ definerer vi prisindekset 
+\begin_inset Formula $P_{t}$
+\end_inset
+
+ ved:
+\begin_inset Formula 
+\[
+\frac{P_{t}}{P_{t-1}}=\frac{\sum_{j}p_{jt}x_{jt}}{\sum_{j}p_{j,t-1}x_{jt}},\,t\neq t_{0}
+\]
+
+\end_inset
+
+og
+\begin_inset Formula 
+\[
+P_{t_{0}}=1.
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Herefter er 
+\begin_inset Formula $X_{t}$
+\end_inset
+
+ defineret ved:
+\begin_inset Formula 
+\[
+X_{t}=\frac{\sum_{j}p_{jt}x_{jt}}{P_{t}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

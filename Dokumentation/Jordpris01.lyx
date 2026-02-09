@@ -1,0 +1,238 @@
+#LyX 2.4 created this file. For more info see https://www.lyx.org/
+\lyxformat 620
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\begin_modules
+theorems-ams
+eqs-within-sections
+figs-within-sections
+\end_modules
+\maintain_unincluded_children no
+\language english
+\language_package default
+\inputencoding auto-legacy
+\fontencoding auto
+\font_roman "times" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_roman_osf false
+\font_sans_osf false
+\font_typewriter_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\float_placement class
+\float_alignment class
+\paperfontsize 12
+\spacing onehalf
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine natbib
+\cite_engine_type authoryear
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_formatted_ref 0
+\use_minted 0
+\use_lineno 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 2.5cm
+\topmargin 2.6cm
+\rightmargin 2.5cm
+\bottommargin 3cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tablestyle default
+\tracking_changes false
+\output_changes false
+\change_bars false
+\postpone_fragile_content false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\docbook_table_output 0
+\docbook_mathml_prefix 1
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+Dækningsbidraget er givet ved:
+\begin_inset Formula 
+\[
+DB_{t}\equiv\phi_{t}J_{t-1}
+\]
+
+\end_inset
+
+hvor 
+\begin_inset Formula $\phi_{t}$
+\end_inset
+
+ er dækningsbidraget per hektar og 
+\begin_inset Formula $J_{t-1}$
+\end_inset
+
+ er mængden af jord ultimo periode 
+\begin_inset Formula $t-1.$
+\end_inset
+
+ Den enkelte bedrifts tilbagediskonterede værdi er
+\begin_inset Formula 
+\[
+V_{0}=\sum_{t=1}^{\infty}\left(DB_{t}-p_{t}^{J}I_{t}^{J}\right)\frac{R_{t}}{R_{0}}
+\]
+
+\end_inset
+
+hvor 
+\begin_inset Formula $p_{t}^{J}$
+\end_inset
+
+ er prisen på jord og hvor udviklingen i jord er givet ved
+\begin_inset Formula 
+\[
+J_{t}=J_{t-1}+I_{t}^{J}
+\]
+
+\end_inset
+
+Tilbagediskonteringsfaktoren 
+\begin_inset Formula $R_{t}$
+\end_inset
+
+ er givet ved:
+\begin_inset Formula 
+\[
+R_{t}\equiv\prod_{s=0}^{t}\frac{1}{1+r_{s}}
+\]
+
+\end_inset
+
+Det gælde at:
+\begin_inset Formula 
+\[
+V_{0}=\sum_{t=1}^{\infty}\left(\phi_{t}J_{t-1}-p_{t}^{J}\left(J_{t}-J_{t-1}\right)\right)\frac{R_{t}}{R_{0}}
+\]
+
+\end_inset
+
+således at
+\begin_inset Formula 
+\[
+\frac{\partial V_{0}}{\partial J_{t}}=-p_{t}^{J}\frac{R_{t}}{R_{0}}+\left(\phi_{t+1}+p_{t+1}^{J}\right)\frac{R_{t+1}}{R_{0}}=0
+\]
+
+\end_inset
+
+eller
+\begin_inset Formula 
+\[
+p_{t+1}^{J}=\left(1+r_{t+1}\right)p_{t}^{J}-\phi_{t+1}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Antag at dækningsbidraget per hektar vokser med en fast vækstrate 
+\begin_inset Formula $g$
+\end_inset
+
+ og at renten er konstant.
+ Det gælder da at:
+\begin_inset Formula 
+\[
+p_{t+1}^{J}=\left(1+r\right)p_{t}^{J}-\phi_{0}\left(1+g\right)^{t+1}
+\]
+
+\end_inset
+
+Definer:
+\begin_inset Formula 
+\[
+\hat{p}_{t+1}^{J}=\frac{p_{t+1}^{J}}{\left(1+g\right)^{t+1}}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\hat{p}_{t+1}^{J}=\left(\frac{1+r}{1+g}\right)\hat{p}_{t}^{J}-p_{0}\phi_{0}
+\]
+
+\end_inset
+
+I steady-state indebærer dette at
+\begin_inset Formula 
+\[
+\hat{p}^{J}=\frac{1+g}{r-g}\phi_{0}
+\]
+
+\end_inset
+
+således at
+\begin_inset Formula 
+\[
+p_{t}^{J}=\left(1+g\right)^{t+1}\frac{\phi_{0}}{r-g}
+\]
+
+\end_inset
+
+I stedy-state vokse 
+\begin_inset Formula $p_{t}^{J}$
+\end_inset
+
+ med samme vækstrate som dækningsbidrafet per hektar 
+\begin_inset Formula $\phi_{t}.$
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

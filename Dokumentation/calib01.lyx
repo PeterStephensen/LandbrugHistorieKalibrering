@@ -1,0 +1,516 @@
+#LyX 2.4 created this file. For more info see https://www.lyx.org/
+\lyxformat 620
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\begin_modules
+theorems-ams
+eqs-within-sections
+figs-within-sections
+\end_modules
+\maintain_unincluded_children no
+\language english
+\language_package default
+\inputencoding auto-legacy
+\fontencoding auto
+\font_roman "times" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_roman_osf false
+\font_sans_osf false
+\font_typewriter_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\float_placement class
+\float_alignment class
+\paperfontsize 12
+\spacing onehalf
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine natbib
+\cite_engine_type authoryear
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_formatted_ref 0
+\use_minted 0
+\use_lineno 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 2.5cm
+\topmargin 2.6cm
+\rightmargin 2.5cm
+\bottommargin 3cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tablestyle default
+\tracking_changes false
+\output_changes false
+\change_bars false
+\postpone_fragile_content false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\docbook_table_output 0
+\docbook_mathml_prefix 1
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Kalibrering af produktivitestudvikling i landbruget og fødevareindustrier
+\end_layout
+
+\begin_layout Author
+Peter Stephensen,
+ DREAM
+\end_layout
+
+\begin_layout Section
+Indledning
+\end_layout
+
+\begin_layout Standard
+Ideen er at udføre historiske kalibreringer af CES-efterspørgselssystemer for landbruget og fødevareindustrierne.
+ Dette gøres direkte på nationanalregnskabsdata der findes fordelt på 117 brancher for perioden 1966-2022.
+ Vi ser på følgende brancher:
+ landbrug (010000),
+ slagterier (100010),
+ mejerier (100030),
+ Anden fødevareindustri mm.
+ (100040,
+ 100050) og Andet (alle andre brancher).
+ 
+\end_layout
+
+\begin_layout Section
+Fødevareindustrier
+\end_layout
+
+\begin_layout Standard
+Den enkelte fødevareindustri 
+\begin_inset Formula $i$
+\end_inset
+
+ beskrives med CES-efterspørgselssystemet:
+\begin_inset Formula 
+\[
+M_{it}^{\text{tot}}=\mu_{it}^{YM\text{tot}}\left(\frac{P_{it}^{M\text{tot}}}{P_{it}^{O}}\right)^{-E_{Y}}Y_{it}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+KL_{it}=\mu_{it}^{YKL}\left(\frac{P_{it}^{KL}}{P_{it}^{O}}\right)^{-E_{Y}}Y_{it}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\begin{equation}
+P_{it}^{O}Y_{it}=P_{it}^{M\text{tot}}M_{it}^{\text{tot}}+P_{it}^{KL}KL_{it}\label{eq:ZP_Y}
+\end{equation}
+
+\end_inset
+
+
+\begin_inset Formula 
+\begin{equation}
+p_{it}=\left(1+m_{it}\right)P_{it}^{O}\label{eq:markup}
+\end{equation}
+
+\end_inset
+
+Her er 
+\begin_inset Formula $M_{it}^{\text{tot}}$
+\end_inset
+
+ materiale-aggregat,
+ 
+\begin_inset Formula $Y_{it}$
+\end_inset
+
+ er branchens output,
+ 
+\begin_inset Formula $KL_{it}$
+\end_inset
+
+ er et KL-aggragat,
+ 
+\begin_inset Formula $P_{it}^{O}$
+\end_inset
+
+ er den såkaldte 
+\begin_inset Quotes eld
+\end_inset
+
+optimerings-pris
+\begin_inset Quotes erd
+\end_inset
+
+,
+ 
+\begin_inset Formula $p_{it}$
+\end_inset
+
+ er branchens output-pris og 
+\begin_inset Formula $m_{it}$
+\end_inset
+
+ er markup.
+\end_layout
+
+\begin_layout Standard
+Variablen 
+\begin_inset Formula $M_{it}^{\text{tot}}$
+\end_inset
+
+ er aggregat over de 5 brancher:
+\begin_inset Formula 
+\[
+M_{ijt}=\mu_{ijt}^{M\text{tot}M}\left(\frac{P_{ijt}^{M}}{P_{it}^{M\text{tot}}}\right)^{-E_{M\text{tot}}}M_{it}^{\text{tot}},\,j=1,..,5
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\begin{equation}
+P_{it}^{M\text{tot}}M_{it}^{\text{tot}}=\sum P_{ijt}^{M}M_{ijt}\label{eq:ZP_Mtot}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Variablen 
+\begin_inset Formula $M_{ijt}$
+\end_inset
+
+ er et aggregat af indenlandsk input 
+\begin_inset Formula $M_{ijt}^{D}$
+\end_inset
+
+ og udenlandsk input 
+\begin_inset Formula $M_{ijt}^{F}$
+\end_inset
+
+ (import):
+\begin_inset Formula 
+\[
+M_{ijt}^{D}=\mu_{ijt}^{MD}\left(\frac{\left(1+\tau_{ijt}^{MD}\right)p_{jt}}{P_{ijt}^{M}}\right)^{-E_{M}}M_{ijt}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+M_{ijt}^{F}=\mu_{ijt}^{MF}\left(\frac{\left(1+\tau_{ijt}^{MF}\right)p_{jt}^{F}}{P_{ijt}^{M}}\right)^{-E_{M}}M_{ijt}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\begin{equation}
+P_{ijt}^{M}M_{ijt}=\left(1+\tau_{ijt}^{MD}\right)p_{jt}M_{ijt}^{D}+\left(1+\tau_{ijt}^{MF}\right)p_{jt}^{F}M_{ijt}^{F}\label{eq:ZP_M}
+\end{equation}
+
+\end_inset
+
+Variablen 
+\begin_inset Formula $KL_{it}$
+\end_inset
+
+ er et aggregat af det ultimo-daterede kapitalapparat 
+\begin_inset Formula $K_{i,t-1}$
+\end_inset
+
+ og beskæftigelsen 
+\begin_inset Formula $L_{it}:$
+\end_inset
+
+
+\begin_inset Formula 
+\[
+K_{i,t-1}=\mu_{it}^{KLK}\left(\frac{P_{it}^{K}}{P_{it}^{KL}}\right)^{-E_{KL}}KL_{it}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+L_{it}=\mu_{it}^{KLL}\left(\frac{w_{it}}{P_{it}^{KL}}\right)^{-E_{KL}}KL_{it}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\begin{equation}
+P_{it}^{KL}KL_{it}=w_{it}L_{it}+P_{it}^{K}K_{it}\label{eq:ZP_KL}
+\end{equation}
+
+\end_inset
+
+Vi antager (i første omgang) at
+\begin_inset Formula 
+\begin{equation}
+P_{it}^{K}=\left(r_{t}+\delta_{it}\right)p_{it}^{I}\label{eq:PK}
+\end{equation}
+
+\end_inset
+
+hvor 
+\begin_inset Formula $r_{t}$
+\end_inset
+
+ er renten,
+ 
+\begin_inset Formula $\delta_{it}$
+\end_inset
+
+ er afskrivningsraten på kapital og 
+\begin_inset Formula $p_{it}^{I}$
+\end_inset
+
+ er investeringsprisen.
+ 
+\end_layout
+
+\begin_layout Standard
+Vi antager at kapitalapparatet føjger akkumulationsligningen:
+\begin_inset Formula 
+\begin{equation}
+K_{it}=\left(1-\delta_{it}\right)K_{i,t-1}+I_{it}\label{eq:acc}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Kalibrering
+\end_layout
+
+\begin_layout Standard
+Vi antager vi har nationalregnskabsdata på mængderne 
+\begin_inset Formula $Y_{it},I_{it},K_{it},L_{it},M_{ijt}^{D},M_{ijt}^{F}$
+\end_inset
+
+ og priserne 
+\begin_inset Formula $p_{it},p_{it}^{I},w_{it},p_{it}^{F}.$
+\end_inset
+
+ Dette kræver at der beregnes kædemængder og -priser for branche 4 og 5.
+ Vi kalibrerer 
+\begin_inset Formula $\tau_{ijt}^{DF}$
+\end_inset
+
+ og 
+\begin_inset Formula $\tau_{ijt}^{MF}$
+\end_inset
+
+ ud fra data for afgifter og told.
+ Data for 
+\begin_inset Formula $I_{it},K_{it}$
+\end_inset
+
+ kræver opslitning fra 69-branche for fødevareindustrierne (dette skal der ses mere på).
+\end_layout
+
+\begin_layout Standard
+Fra akkumulationsligningen (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:acc"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+
+\end_inset
+
+) kalibreres 
+\begin_inset Formula $\delta_{it}:$
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\delta_{it}=\frac{K_{i,t-1}-K_{it}+I_{it}}{K_{i,t-1}}
+\]
+
+\end_inset
+
+Herefter kan 
+\begin_inset Formula $P_{it}^{K}$
+\end_inset
+
+ beregnes ud fra (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:PK"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Standard
+Ved at indsætte (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:ZP_KL"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+
+\end_inset
+
+),
+ (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:ZP_M"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+
+\end_inset
+
+) og (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:ZP_Mtot"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+
+\end_inset
+
+) i (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:ZP_Y"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+
+\end_inset
+
+) kan 
+\begin_inset Formula $P_{it}^{O}$
+\end_inset
+
+ beregnes.
+ Herefter kan markup'em 
+\begin_inset Formula $m_{it}$
+\end_inset
+
+ beregnes fra (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:markup"
+plural "false"
+caps "false"
+noprefix "false"
+nolink "false"
+
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Standard
+Beregn 
+\begin_inset Formula $KL_{t}$
+\end_inset
+
+ og 
+\begin_inset Formula $P_{t}^{KL}$
+\end_inset
+
+ som kædemængde og pris.
+ Beregn på samme måde 
+\begin_inset Formula $M_{ijt}$
+\end_inset
+
+ og 
+\begin_inset Formula $P_{ijt}^{M}$
+\end_inset
+
+ samt 
+\begin_inset Formula $M_{jt}^{\text{tot}}$
+\end_inset
+
+ og 
+\begin_inset Formula $P_{jt}^{M\text{tot}}.$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Nu har vi alle mængder og priser og kan derfor kalibrere alle CES-andelsparametrene (idet vi antager at kende alle substitutionselasticiteter).
+ 
+\end_layout
+
+\end_body
+\end_document
