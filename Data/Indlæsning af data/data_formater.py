@@ -3,10 +3,14 @@ import pandas as pd
 t = 'TID'         # Tid
 j = 'TILGANG2'    # Input
 i = 'ANVENDELSE'  # Output
+ii= 'BRANCHE' #Aggregeret branche på 69 opdeling
 
 # Indlæs data
-df = pd.read_csv('../Nationalregnskab/Data/landbrugsdata_faste_priser.csv')
-
+df = pd.read_csv('../Nationalregnskab/Data/landbrugsdata_mængdeindeks.csv')
+df_priser = pd.read_csv('../Nationalregnskab/Data/landbrugsdata_prisindeks.csv')
+df_timer = pd.read_csv('../Nationalregnskab/Data/Timer_landbrugsdata.csv')
+df_timeLon = pd.read_csv('../Nationalregnskab/Data/TimeLon_landbrugsdata.csv')
+df_kapital = pd.read_csv('../Nationalregnskab/Data/Kapital_landbrugsdata.csv')
 
 # Mapping for både Tilgang og Anvendelse
 mapping = {
@@ -20,11 +24,15 @@ mapping = {
     'REST_TILGANG Øvrige brancher': 'REST',
     'REST_ANVENDELSE Øvrige brancher': 'REST'
 }
+###################################################################
+###################   M Æ N G D E R    ############################
+###################################################################
 
 # Erstat navnene i de to kolonner
 df['TILGANG2'] = df['TILGANG2'].replace(mapping)
 df['ANVENDELSE'] = df['ANVENDELSE'].replace(mapping)
-
+df_priser['TILGANG2'] = df_priser['TILGANG2'].replace(mapping)
+df_priser['ANVENDELSE'] = df_priser['ANVENDELSE'].replace(mapping)
 # Opdateret liste med de korte navne
 brancher = ['010000', '100010', '100030', '100040x100050', 'REST']
 
@@ -44,10 +52,10 @@ Y = produktionsværdi_data.pivot_table(index=[j, t], values='Xt').fillna(0)
 Y.index.names = [i, t]
 
 
-#Investeringer
-investerings_data = df[(df['TILGANG1'] == 'Dansk produktion') & (df[i] == 'Faste bruttoinvesteringer + Lagerforøgelse + Værdigenstande (Anvendelse)')]
-I = investerings_data.pivot_table(index=[j, t], values='Xt').fillna(0)
-I.index.names = [i, t]
+# #Investeringer
+# investerings_data = df[(df['TILGANG1'] == 'Dansk produktion') & (df[i] == 'Faste bruttoinvesteringer + Lagerforøgelse + Værdigenstande (Anvendelse)')]
+# I = investerings_data.pivot_table(index=[j, t], values='Xt').fillna(0)
+# I.index.names = [i, t]
 
 #offentligt forbrug
 offentligt_forbrug_data = df[(df['TILGANG1'] == 'Dansk produktion') & (df[i] == 'Offentligt forbrug, i alt-(Anvendelse)')]
@@ -65,3 +73,31 @@ C.index.names = [i, t]
 eksport_data = df[(df['TILGANG1'] == 'Dansk produktion') & (df[i] == 'Eksport - (Anvendelse)')]
 X = eksport_data.pivot_table(index=[j, t], values='Xt').fillna(0)
 X.index.names = [i, t]
+
+#timer
+timer_data = df_timer
+L = timer_data.pivot_table(index=[i, t], values='TIMER').fillna(0)
+L.index.names = [i, t]
+
+#kapitalapparat
+kapitalapparat_data = df_kapital[(df_kapital['BEHOLD'] == 'AN.11 Faste aktiver, nettobeholdning ultimo året')]
+K = kapitalapparat_data.pivot_table(index=[ii, t], values='INDHOLD').fillna(0)
+K.index.names = [ii, t]
+
+#Bruttoinvesteringer
+bruttoinvesterings_data = df_kapital[(df_kapital['BEHOLD'] == 'P.51g Faste bruttoinvesteringer')]
+I = bruttoinvesterings_data.pivot_table(index=[ii, t], values='INDHOLD').fillna(0)
+I.index.names = [ii, t]
+
+# ###################################################################
+# ###################   P R I S E R    ##############################
+# ###################################################################
+# output priser
+produktionsværdi_data_priser = df_priser[(df_priser['TILGANG1'] == 'Dansk produktion') & (df_priser[i] == 'Anvendelse, i alt-(Anvendelse)')]
+P = produktionsværdi_data_priser.pivot_table(index=[j, t], values='Pt').fillna(0)
+P.index.names = [i, t]
+
+#løn
+lon_data = df_timeLon
+w = df_timeLon.pivot_table(index=[i, t], values='TIMELOEN_KR').fillna(0)
+w.index.names = [i, t]
