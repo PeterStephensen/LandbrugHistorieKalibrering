@@ -2,16 +2,16 @@ import pandas as pd
 import numpy as np
 
 # Indlæs filen
-df_materialer = pd.read_csv('../Nationalregnskab/Data69/landbrugsdata.csv')
-df_tau_MD = pd.read_csv('../Nationalregnskab/Data69/tau_MD.csv')
-df_tau_MF = pd.read_csv('../Nationalregnskab/Data69/landbrugsdata_toldssats.csv')
-df_kapital = pd.read_csv('../Nationalregnskab/Data69/landbrugsdata_mængdeindeks_kapital.csv')
-df_kapital_pris = pd.read_csv('../Nationalregnskab/Data69/P_K.csv')
-df_lonsum=pd.read_csv('../Nationalregnskab/Data69/input_landbrugsdata.csv')
-df_timer=pd.read_csv('../Nationalregnskab/Data69/Timer_landbrugsdata.csv')
-df_timeLon=pd.read_csv('../Nationalregnskab/Data69/TimeLon_landbrugsdata.csv')
-df_jord=pd.read_csv('../Nationalregnskab/Data69/landbrugsdata_mængdeindeks_jord.csv')
-df_jord_pris=pd.read_csv('../Nationalregnskab/Data69/landbrugsdata_prisindeks_jord.csv')
+df_materialer = pd.read_csv('Data/Nationalregnskab/Data69/landbrugsdata.csv')
+df_tau_MD = pd.read_csv('Data/Nationalregnskab/Data69/tau_MD.csv')
+df_tau_MF = pd.read_csv('Data/Nationalregnskab/Data69/landbrugsdata_toldssats.csv')
+df_kapital = pd.read_csv('Data/Nationalregnskab/Data69/landbrugsdata_mængdeindeks_kapital.csv')
+df_kapital_pris = pd.read_csv('Data/Nationalregnskab/Data69/P_K.csv')
+df_lonsum=pd.read_csv('Data/Nationalregnskab/Data69/input_landbrugsdata.csv')
+df_timer=pd.read_csv('Data/Nationalregnskab/Data69/Timer_landbrugsdata.csv')
+df_timeLon=pd.read_csv('Data/Nationalregnskab/Data69/TimeLon_landbrugsdata.csv')
+df_jord=pd.read_csv('Data/Nationalregnskab/Data69/landbrugsdata_mængdeindeks_jord.csv')
+df_jord_pris=pd.read_csv('Data/Nationalregnskab/Data69/landbrugsdata_prisindeks_jord.csv')
 
 mapping = {
     '01000 Landbrug og gartneri-(Tilgang)': '01000',
@@ -340,11 +340,11 @@ df_Xt_Mit = df_Xt_Mit.reset_index()
 
 # Beregn aggregater
 k_prev=df_kapital.groupby(level=['ANVENDELSE'])['Xt'].shift(1)
-df_KL_aggregat_l=df_lonsom_lob['INDHOLD']+k_prev*df_kapital_pris['P']
+df_KL_aggregat_l=df_lonsom_lob['INDHOLD']+k_prev*df_kapital_pris['Pt']
 df_KL_aggregat_lobende = df_KL_aggregat_l.reset_index(name='INDHOLD')
 
 lon_prev = df_timeLon.groupby(level=['ANVENDELSE'])['TIMELOEN_KR'].shift(1)
-pk_prev=df_kapital_pris.groupby(level=['ANVENDELSE'])['P'].shift(1)
+pk_prev=df_kapital_pris.groupby(level=['ANVENDELSE'])['Pt'].shift(1)
 
 df_KL_aggregat_f=lon_prev*df_timer['TIMER']/1000+pk_prev*k_prev
 df_KL_aggregat_for = df_KL_aggregat_f.reset_index(name='INDHOLD')
@@ -469,7 +469,7 @@ df_master_aggregater = df_Pt_Mit.rename(columns={'Pt': 'P_Mtot'}).join([
 ])
 
 # Gem Niveau 2 filen
-df_master_aggregater.to_csv('../Nationalregnskab/Data69/Aggregater_KL_M.csv')
+df_master_aggregater.to_csv('Data/Nationalregnskab/Data69/Aggregater_KL_M.csv')
 
 
 # --- MASTER-FIL 2: VAREGRUPPER (Niveau 1) ---
@@ -479,4 +479,4 @@ df_master_varegrupper = df_Pt_Mjit.rename(columns={'Pt': 'P_M'}).join([
 ])
 
 # Gem Niveau 1 filen
-df_master_varegrupper.to_csv('../Nationalregnskab/Data69/Aggregater_Mjit.csv')
+df_master_varegrupper.to_csv('Data/Nationalregnskab/Data69/Aggregater_Mjit.csv')

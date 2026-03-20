@@ -13,7 +13,6 @@ r_map = {
     '10120': 0.07,
     'REST': 0.07
 }
-
 # Konverter r_map direkte til en Pandas Series
 r = pd.Series(r_map)
 r.index.name = i
@@ -38,7 +37,7 @@ delta.index.names = [i, t]
 # Beregn usercost of capital
 df.P_I.index.names = [i, t]
 P_K=(r+delta)*df.P_I['Pt']
-P_K_final = P_K.reset_index(name='P')
+P_K_final = P_K.reset_index(name='Pt')
 P_K_final.to_csv('../Nationalregnskab/Data69/P_K.csv', index=False)
 
 # Bestem først samlet dansk produktion ved at summe over tilgang i M_D
@@ -65,7 +64,21 @@ P_MxM_tot.index.names = [i, t]
 
 # Beregn P_KLxKL
 df.K.index.names = [i, t]
-P_KLxKL=df.w['TIMELOEN_KR']*df.L['Xt']/1000+P_K*K_prev
+P_KLxKL=df.w['Pt']*df.L['Xt']+P_K*K_prev
+
+#Beregn først residual
+landbrug_index = df.P['Pt'].loc['01000', :].index
+# Reindex hektarstøtte til at matche landbrug index
+hektarstotte_reindexed = df.hektarstotte['INDHOLD'].reindex(landbrug_index, fill_value=0)
+# Sæt hektarstøtte til 0 for år >= 2005 (kun træk fra før 2005)
+hektarstotte_adjusted = hektarstotte_reindexed.copy()
+hektarstotte_adjusted.loc[hektarstotte_adjusted.index >= 2005] = 0
+
+Res = (df.P['Pt'].loc['01000', :] * df.Y['Xt'].loc['01000', :] 
+       - hektarstotte_adjusted
+       - P_MxM_tot.loc['01000', :]
+       - df.w['Pt'].loc['01000', :] * df.L['Xt'].loc['01000', :]
+       - P_K.loc['01000', :] * K_prev.loc['01000', :])
 
 #For landbrug specifikt
 P_J=r.loc['01000']*df.P_Jord['Pt']
@@ -102,18 +115,23 @@ def P_O_landbrug(P_MxM_tot, P_KLxKL, PxJ, df):
 
 P_O = P_O_landbrug(P_MxM_tot, P_KLxKL, PxJ, df)
 
-# #Beregn P_O
-# P_O=(P_MxM_tot+P_KLxKL)/df.Y['Xt']
-
-#Beregn subsidiesats
-tau_Y=df.subsidier['INDHOLD']/(df.Y_lob['INDHOLD']-df.subsidier['INDHOLD'])
+# Subsidier og hektarstøtte
+subs_adj = df.subsidier['INDHOLD'].copy()
+landbrug_mask = subs_adj.index.get_level_values('ANVENDELSE') == '01000'
+tid_mask = subs_adj.index.get_level_values('TID') >= 2005
+mask = landbrug_mask & tid_mask
+tid_values = subs_adj.index.get_level_values('TID')[mask]
+hektarstotte_reindexed = df.hektarstotte['INDHOLD'].reindex(tid_values, fill_value=0)
+# Træk hektarstøtte fra
+subs_adj.loc[mask] = subs_adj.loc[mask] + hektarstotte_reindexed.values
+tau_Y = subs_adj / (df.Y_lob['INDHOLD'] - subs_adj)
 
 #Beregn markup
 markup=df.P['Pt']/((1+tau_Y)*P_O)-1
 
 #Øverste CES
-mu_Y_Mtot = (df.Mtot['Xt'] / df.Y['Xt']) * (df.P_Mtot['P_Mtot'] / P_O)**EY
-mu_Y_KL   = (df.KL['Xt']       / df.Y['Xt']) * (df.P_KL['P_KL']     / P_O)**EY
+mu_Y_Mtot = (df.Mtot['Xt'] / df.Y['Xt']) * (df.P_Mtot['Pt'] / P_O)**EY
+mu_Y_KL   = (df.KL['Xt']       / df.Y['Xt']) * (df.P_KL['Pt']     / P_O)**EY
 mu_Y_KL.index.names = [i, t]
 mu_Y_Mtot.index.names = [i, t]
 
@@ -130,10 +148,10 @@ Mtot_exp = pd.Series(
 )
 
 # Merge P_Mtot
-P_Mtot_df = df.P_Mtot['P_Mtot'].reset_index(name='P_Mtot')
+P_Mtot_df = df.P_Mtot['Pt'].reset_index(name='Pt')
 P_Mtot_expanded = M_index_df.merge(P_Mtot_df, on=[i, t], how='left').fillna(0)
 P_Mtot_exp = pd.Series(
-    P_Mtot_expanded['P_Mtot'].values,
+    P_Mtot_expanded['Pt'].values,
     index=pd.MultiIndex.from_frame(P_Mtot_expanded[[i, j, t]])
 )
 
@@ -148,8 +166,8 @@ mu_MD.index.names = [i, j, t]
 mu_MF.index.names = [i, j, t]
 
 # KL niveau
-mu_KL_K = (K_prev/ df.KL['Xt']) * (P_K / df.P_KL['P_KL'])**EKL
-mu_KL_L = ((df.L['Xt']) / df.KL['Xt']) * (df.w['TIMELOEN_KR'] / df.P_KL['P_KL'])**EKL
+mu_KL_K = (K_prev/ df.KL['Xt']) * (P_K/ df.P_KL['Pt'])**EKL
+mu_KL_L = ((df.L['Xt']) / df.KL['Xt']) * (df.w['Pt'] / df.P_KL['Pt'])**EKL
 
 # Beregn thetaer
 theta_Y_KL=mu_Y_KL**(1/(EY-1))

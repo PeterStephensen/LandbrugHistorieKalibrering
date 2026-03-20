@@ -1,4 +1,6 @@
+
 import pandas as pd
+
 # Definition af dimensioner
 t = 'TID'         # Tid
 j = 'TILGANG2'    # Input
@@ -10,7 +12,8 @@ df = pd.read_csv('../Nationalregnskab/Data69/landbrugsdata_mængdeindeks.csv')
 df_priser = pd.read_csv('../Nationalregnskab/Data69/landbrugsdata_prisindeks.csv')
 df_timer = pd.read_csv('../Nationalregnskab/Data69/Timer_landbrugsdata.csv')
 df_timeLon = pd.read_csv('../Nationalregnskab/Data69/TimeLon_landbrugsdata.csv')
-df_kapital = pd.read_csv('../Nationalregnskab/Data69/landbrugsdata_mængdeindeks_kapital.csv')
+df_kapital = pd.read_csv('../Nationalregnskab/Data69/Kapital_landbrugsdata.csv')
+df_kapital_mængder=pd.read_csv('../Nationalregnskab/Data69/landbrugsdata_mængdeindeks_kapital.csv')
 df_kapital_pris = pd.read_csv('../Nationalregnskab/Data69/landbrugsdata_prisindeks_kapital.csv')
 df_toldssats = pd.read_csv('../Nationalregnskab/Data69/landbrugsdata_toldssats.csv')
 df_afgift = pd.read_csv('../Nationalregnskab/Data69/landbrugsdata_afgift.csv')
@@ -18,10 +21,11 @@ df_produktion_løbende = pd.read_csv('../Nationalregnskab/Data69/landbrugsdata.c
 df_aggregater = pd.read_csv('../Nationalregnskab/Data69/Aggregater_KL_M.csv')
 df_aggregater_mjit = pd.read_csv('../Nationalregnskab/Data69/Aggregater_Mjit.csv')
 df_input = pd.read_csv('../Nationalregnskab/Data69/input_landbrugsdata.csv')
-df_jordareal = pd.read_csv('../Nationalregnskab/Data69/landbrugsdata_mængdeindeks_jord.csv')
+df_jordareal = pd.read_csv('../Nationalregnskab/Data69/landbrugsdata_jordareal.csv')
 df_jordpris = pd.read_csv('../Nationalregnskab/Data69/landbrugsdata_prisindeks_jord.csv')
-
-
+df_tilskud = pd.read_csv('../Nationalregnskab/Data69/landbrugsdata_tilskud.csv')
+df_timer_lon = pd.read_csv('../Nationalregnskab/Data69/Timer_lon_landbrugsdata.csv')
+df_realkredit=pd.read_csv('../Nationalregnskab/Data69/rente_landbrugsdata.csv')
 
 # Mapping for både Tilgang og Anvendelse
 mapping = {
@@ -47,6 +51,7 @@ df_priser['ANVENDELSE'] = df_priser['ANVENDELSE'].replace(mapping)
 df_timer['ANVENDELSE'] = df_timer['ANVENDELSE'].replace(mapping)
 df_timeLon['ANVENDELSE'] = df_timeLon['ANVENDELSE'].replace(mapping)
 df_kapital['BRANCHE'] = df_kapital['BRANCHE'].replace(mapping)
+df_kapital_mængder['BRANCHE'] = df_kapital_mængder['BRANCHE'].replace(mapping)
 df_kapital_pris['BRANCHE'] = df_kapital_pris['BRANCHE'].replace(mapping)
 df_toldssats['ANVENDELSE'] = df_toldssats['ANVENDELSE'].replace(mapping)
 df_toldssats['TILGANG2'] = df_toldssats['TILGANG2'].replace(mapping)
@@ -97,17 +102,23 @@ X.index.names = [i, t]
 
 #timer
 timer_data = df_timer
-L = timer_data.pivot_table(index=[i, t], values='TIMER').fillna(0)
+L = timer_data.pivot_table(index=[i, t], values='TIMER').fillna(0)/1000
 L.rename(columns={'TIMER': 'Xt'}, inplace=True)
 L.index.names = [i, t]
 
+timer_lon_data = df_timer_lon
+L_lon = timer_lon_data.pivot_table(index=[i, t], values='TIMER').fillna(0)/1000
+L_lon.rename(columns={'TIMER': 'Xt'}, inplace=True)
+L_lon.index.names = [i, t]
+
 #kapitalapparat
-kapitalapparat_data = df_kapital[(df_kapital['BEHOLD'] == 'AN.11 Faste aktiver, nettobeholdning ultimo året')]
-K = kapitalapparat_data.pivot_table(index=[ii, t], values='Xt').fillna(0)
+kapitalapparat_data = df_kapital[(df_kapital['BEHOLD'] == 'AN.11 Faste aktiver, nettobeholdning ultimo året') & (df_kapital['PRISENHED'] == '2020-priser, kædede værdier')]
+K = kapitalapparat_data.pivot_table(index=[ii, t], values='INDHOLD').fillna(0)
+K.rename(columns={'INDHOLD': 'Xt'}, inplace=True)
 K.index.names = [i, t]
 
 #Bruttoinvesteringer
-bruttoinvesterings_data = df_kapital[(df_kapital['BEHOLD'] == 'P.51g Faste bruttoinvesteringer')]
+bruttoinvesterings_data = df_kapital_mængder[(df_kapital_mængder['BEHOLD'] == 'P.51g Faste bruttoinvesteringer')]
 I = bruttoinvesterings_data.pivot_table(index=[ii, t], values='Xt').fillna(0)
 I.index.names = [i, t]
 
@@ -138,23 +149,29 @@ subsidier_data = df_input[(df_input['TILGANG1'] == 'Andre produktionsskatter, ne
 subsidier = subsidier_data.pivot_table(index=[i, t], values='INDHOLD').fillna(0)
 subsidier.index.names = [i, t]
 
+# Hektarstøtte
+hektarstotte_data = df_tilskud
+hektarstotte = hektarstotte_data.pivot_table(index=[t], values='INDHOLD').fillna(0)
+hektarstotte.index.names = [t]
+
 # Jordareal
 jordareal_data = df_jordareal
-J_temp = jordareal_data.pivot_table(index=[t], values='Xt').fillna(0).squeeze()
+J_temp = jordareal_data.pivot_table(index=[t], values='INDHOLD').fillna(0).squeeze()
 
 # Lav J til MultiIndex format [i, t] med kun værdier for branche 01000
 J_index = pd.MultiIndex.from_product([['01000'], J_temp.index], names=[i, t])
-J_series = pd.Series(J_temp.values, index=J_index, name='Xt')
+J_series = pd.Series(J_temp.values, index=J_index, name='INDHOLD')
 
 # Tilføj de andre brancher med værdier 0
 other_branches = ['10120', 'REST']
 for branch in other_branches:
     branch_index = pd.MultiIndex.from_product([[branch], J_temp.index], names=[i, t])
-    J_other = pd.Series(0, index=branch_index, name='Xt')
+    J_other = pd.Series(0, index=branch_index, name='INDHOLD')
     J_series = pd.concat([J_series, J_other])
 
-J = J_series.to_frame(name='Xt')
+J = J_series.to_frame(name='INDHOLD')
 J = J.sort_index()
+J.rename(columns={'INDHOLD': 'Xt'}, inplace=True)
 
 #JKL aggregat
 #JKL aggregat - kun for branche 01000
@@ -198,7 +215,9 @@ P.index.names = [i, t]
 #løn
 lon_data = df_timeLon
 w = df_timeLon.pivot_table(index=[i, t], values='TIMELOEN_KR').fillna(0)
+w.rename(columns={'TIMELOEN_KR': 'Pt'}, inplace=True)
 w.index.names = [i, t]
+
 
 #investeringspriser
 investeringspriser_data = df_kapital_pris[(df_kapital_pris['BEHOLD'] == 'P.51g Faste bruttoinvesteringer')]
@@ -233,7 +252,9 @@ afgift.index.names = [i, t]
 #KL aggregat pris
 KL_aggregat_pris_data = df_aggregater[(df_aggregater['ANVENDELSE'].isin(brancher))]
 P_KL = KL_aggregat_pris_data.pivot_table(index=[i, t], values='P_KL').fillna(0)
+P_KL.rename(columns={'P_KL': 'Pt'}, inplace=True)
 P_KL.index.names = [i, t]
+
 
 #M aggregat pris
 M_aggregat_pris_data = df_aggregater_mjit[(df_aggregater_mjit['ANVENDELSE'].isin(brancher))]
@@ -243,6 +264,7 @@ P_M.index.names = [i, j, t]
 #Mtot aggregat pris
 Mtot_aggregat_pris_data = df_aggregater[(df_aggregater['ANVENDELSE'].isin(brancher))]
 P_Mtot = Mtot_aggregat_pris_data.pivot_table(index=[i, t], values='P_Mtot').fillna(0)
+P_Mtot.rename(columns={'P_Mtot': 'Pt'}, inplace=True)
 P_Mtot.index.names = [i, t]
 
 #Jordpris
@@ -264,3 +286,18 @@ P_MDtot.index.names = [i, t]
 MF_aggregat_pris_data = df_aggregater[(df_aggregater['ANVENDELSE'].isin(brancher))]
 P_MFtot = MF_aggregat_pris_data.pivot_table(index=[i, t], values='P_MFtot').fillna(0)
 P_MFtot.index.names = [i, t]
+
+#Rente
+# Step 1: behold din tidsserie
+R_t = df_realkredit.pivot_table(index=[t], values='INDHOLD').fillna(0)
+
+# Step 2: lav MultiIndex for (i, t)
+R_index = pd.MultiIndex.from_product([brancher, R_t.index], names=[i, t])
+
+# Step 3: gentag værdier for hver branche
+R_geld = pd.DataFrame(
+    R_t.loc[R_index.get_level_values(t)].values,
+    index=R_index,
+    columns=['Rt']
+)
+
