@@ -1,5 +1,6 @@
 
 import pandas as pd
+import dreamtools as dt
 
 # Definition af dimensioner
 t = 'TID'         # Tid
@@ -22,10 +23,12 @@ df_aggregater = pd.read_csv('../Nationalregnskab/Data69/Aggregater_KL_M.csv')
 df_aggregater_mjit = pd.read_csv('../Nationalregnskab/Data69/Aggregater_Mjit.csv')
 df_input = pd.read_csv('../Nationalregnskab/Data69/input_landbrugsdata.csv')
 df_jordareal = pd.read_csv('../Nationalregnskab/Data69/landbrugsdata_jordareal.csv')
-df_jordpris = pd.read_csv('../Nationalregnskab/Data69/landbrugsdata_prisindeks_jord.csv')
+df_jordpris = pd.read_csv('../Nationalregnskab/Data69/jordpris.csv')
 df_tilskud = pd.read_csv('../Nationalregnskab/Data69/landbrugsdata_tilskud.csv')
 df_timer_lon = pd.read_csv('../Nationalregnskab/Data69/Timer_lon_landbrugsdata.csv')
 df_realkredit=pd.read_csv('../Nationalregnskab/Data69/rente_landbrugsdata.csv')
+makrodata= dt.Gdx('../Nationalregnskab/Data69/konjunktur_juni2025.gdx')
+df_grundskyld = pd.read_csv('../Nationalregnskab/Data69/grundskyld.csv')
 
 # Mapping for både Tilgang og Anvendelse
 mapping = {
@@ -36,7 +39,7 @@ mapping = {
     '10120 Føde-, drikke- og tobaksvareindustri- (Anvendelse)': '10120',
     '10120 Føde-, drikke- og tobaksvareindustri': '10120',
     'REST_TILGANG Øvrige brancher': 'REST',
-    'REST_ANVENDELSE Øvrige brancher': 'REST'
+    'REST_ANVENDELSE Øvrige brancher': 'REST',
 
 }
 ###################################################################
@@ -122,6 +125,12 @@ bruttoinvesterings_data = df_kapital_mængder[(df_kapital_mængder['BEHOLD'] == 
 I = bruttoinvesterings_data.pivot_table(index=[ii, t], values='Xt').fillna(0)
 I.index.names = [i, t]
 
+brutto_loebende_data = df_kapital[(df_kapital['BEHOLD'] == 'P.51g Faste bruttoinvesteringer') & (df_kapital['PRISENHED'] == 'Løbende priser')]
+I_lob = brutto_loebende_data.pivot_table(index=[ii, t], values='INDHOLD').fillna(0)
+I_lob.rename(columns={'INDHOLD': 'Xt'}, inplace=True)
+I_lob.index.names = [i, t]
+
+
 M_D_loebende=df_produktion_løbende[(df_produktion_løbende['TILGANG1'] == 'Dansk produktion') & (df_produktion_løbende[i].isin(brancher)) & (df_produktion_løbende['PRISENHED'] == 'Løbende priser')]
 M_D_loebende = M_D_loebende.pivot_table(index=[i, j, t], values='INDHOLD').fillna(0)
 M_D_loebende.index.names = [i, j, t]
@@ -153,6 +162,8 @@ subsidier.index.names = [i, t]
 hektarstotte_data = df_tilskud
 hektarstotte = hektarstotte_data.pivot_table(index=[t], values='INDHOLD').fillna(0)
 hektarstotte.index.names = [t]
+
+
 
 # Jordareal
 jordareal_data = df_jordareal
@@ -269,12 +280,19 @@ P_Mtot.index.names = [i, t]
 
 #Jordpris
 jordpris_data = df_jordpris
-P_Jord = jordpris_data.pivot_table(index=[t], values='Pt').fillna(0)
+P_Jord = jordpris_data.pivot_table(index=[t], values='INDHOLD').fillna(0)
 P_Jord.index.names = [t]
+P_Jord.rename(columns={'INDHOLD': 'Pt'}, inplace=True)
+
+#Grundskyld
+grundskyld_data = df_grundskyld
+grundskyld = grundskyld_data.pivot_table(index=[t], values='INDHOLD').fillna(0)
+grundskyld.index.names = [t]
 
 #JKL aggregat pris
 JKL_aggregat_pris_data = df_aggregater[(df_aggregater['ANVENDELSE'].isin(brancher))]
 P_JKL = JKL_aggregat_pris_data.pivot_table(index=[i, t], values='P_JKL').fillna(0)
+P_JKL.rename(columns={'P_JKL': 'Pt'}, inplace=True)
 P_JKL.index.names = [i, t]
 
 #MD aggregat pris
@@ -301,3 +319,28 @@ R_geld = pd.DataFrame(
     columns=['Rt']
 )
 
+# Makrodata
+qK=makrodata.qK[:,:,:]
+qK = qK[(qK.index.get_level_values('t') >= 1992) & (qK.index.get_level_values('t') <= 2022) & (qK.index.get_level_values('i_').isin(['iB', 'iM']))]
+qK = qK.rename_axis(index={'i_': 'k'})
+rAfskr = makrodata.rAfskr[:,:,:]
+rAfskr = rAfskr[(rAfskr.index.get_level_values('t') >= 1992) & (rAfskr.index.get_level_values('t') <= 2022)]
+qKxrAfskr = qK*rAfskr
+qKxrAfskr_sum=qKxrAfskr.groupby(['s_','t']).sum()
+mask = ~qK.index.get_level_values('s_').isin(['lan', 'fre'])
+qKxrAfskr_sum_rest = qKxrAfskr[mask].groupby(['t']).sum()
+qK_sum=qK.groupby(['s_','t']).sum()
+qK_sum_rest = qK[mask].groupby(['t']).sum()
+rTaxDep=qKxrAfskr_sum/qK_sum
+rTaxDep_rest = qKxrAfskr_sum_rest/qK_sum_rest
+
+rBonds_ra = makrodata.rRente['RealKred',:]
+rBonds_ra = rBonds_ra[(rBonds_ra.index.get_level_values('t') >= 1992) & (rBonds_ra.index.get_level_values('t') <= 2022)]
+tCorp_ra=makrodata.tSelskab[:]
+tCorp_ra = tCorp_ra[(tCorp_ra.index.get_level_values('t') >= 1992) & (tCorp_ra.index.get_level_values('t') <= 2022)]
+
+rBonds = P.copy()
+rBonds['Pt'] = rBonds.index.get_level_values('TID').map(rBonds_ra)
+
+tCorp = P.copy()
+tCorp['Pt'] = tCorp.index.get_level_values('TID').map(tCorp_ra)

@@ -2,36 +2,41 @@ import pandas as pd
 import numpy as np
 
 # Indlæs filen
-df_materialer = pd.read_csv('Data/Nationalregnskab/Data69/landbrugsdata.csv')
-df_tau_MD = pd.read_csv('Data/Nationalregnskab/Data69/tau_MD.csv')
-df_tau_MF = pd.read_csv('Data/Nationalregnskab/Data69/landbrugsdata_toldssats.csv')
-df_kapital = pd.read_csv('Data/Nationalregnskab/Data69/landbrugsdata_mængdeindeks_kapital.csv')
-df_kapital_pris = pd.read_csv('Data/Nationalregnskab/Data69/P_K.csv')
-df_lonsum=pd.read_csv('Data/Nationalregnskab/Data69/input_landbrugsdata.csv')
-df_timer=pd.read_csv('Data/Nationalregnskab/Data69/Timer_landbrugsdata.csv')
-df_timeLon=pd.read_csv('Data/Nationalregnskab/Data69/TimeLon_landbrugsdata.csv')
-df_jord=pd.read_csv('Data/Nationalregnskab/Data69/landbrugsdata_mængdeindeks_jord.csv')
-df_jord_pris=pd.read_csv('Data/Nationalregnskab/Data69/landbrugsdata_prisindeks_jord.csv')
+df_materialer = pd.read_csv('../Nationalregnskab_117/Data117/landbrugsdata.csv')
+df_tau_MD = pd.read_csv('../Nationalregnskab_117/Data117/tau_MD.csv')
+df_tau_MF = pd.read_csv('../Nationalregnskab_117/Data117/landbrugsdata_toldssats.csv')
+df_kapital = pd.read_csv('../Nationalregnskab_117/Data117/K.csv')
+df_kapital_pris = pd.read_csv('../Nationalregnskab_117/Data117/P_K.csv')
+df_lonsum=pd.read_csv('../Nationalregnskab_117/Data117/input_landbrugsdata.csv')
+df_timer=pd.read_csv('../Nationalregnskab_117/Data117/Timer_landbrugsdata.csv')
+df_timeLon=pd.read_csv('../Nationalregnskab_117/Data117/TimeLon_landbrugsdata.csv')
+df_jord=pd.read_csv('../Nationalregnskab/Data69/landbrugsdata_jordareal.csv')
+df_jord_pris=pd.read_csv('../Nationalregnskab/Data69/P_J.csv')
 
 mapping = {
-    '01000 Landbrug og gartneri-(Tilgang)': '01000',
-    '01000 Landbrug og gartneri- (Anvendelse)': '01000',
-    '01000 Landbrug og gartneri': '01000',
-    '10120 Føde-, drikke- og tobaksvareindustri-(Tilgang)': '10120',
-    '10120 Føde-, drikke- og tobaksvareindustri- (Anvendelse)': '10120',
-    '10120 Føde-, drikke- og tobaksvareindustri': '10120',
+    '010000 Landbrug og gartneri-(Tilgang)': '010000',
+    '010000 Landbrug og gartneri- (Anvendelse)': '010000',
+    '010000 Landbrug og gartneri': '010000',
+    '100010 Slagterier-(Tilgang)': '100010',
+    '100010 Slagterier- (Anvendelse)': '100010',
+    '100010 Slagterier': '100010',
+    '100030 Mejerier-(Tilgang)': '100030',
+    '100030 Mejerier- (Anvendelse)': '100030',
+    '100030 Mejerier': '100030',
+    '100040x100050 Anden fødevareindustri (100040, 100050)-(Tilgang)': '100040x100050',
+    '100040x100050 Anden fødevareindustri (100040, 100050)- (Anvendelse)': '100040x100050',
+    '100040x100050 Anden fødevareindustri (100040, 100050)': '100040x100050',
     'REST_TILGANG Øvrige brancher': 'REST',
     'REST_ANVENDELSE Øvrige brancher': 'REST'
-
 }
 
-brancher = ['01000', '10120', 'REST']
+brancher = ['010000', '100010', '100030', '100040x100050', 'REST']
 
 df_materialer['ANVENDELSE'] = df_materialer['ANVENDELSE'].replace(mapping)
 df_materialer['TILGANG2'] = df_materialer['TILGANG2'].replace(mapping)
 df_tau_MF['ANVENDELSE'] = df_tau_MF['ANVENDELSE'].replace(mapping)
 df_tau_MF['TILGANG2'] = df_tau_MF['TILGANG2'].replace(mapping)
-df_kapital['BRANCHE'] = df_kapital['BRANCHE'].replace(mapping)
+df_kapital['ANVENDELSE'] = df_kapital['ANVENDELSE'].replace(mapping)
 df_lonsum['ANVENDELSE'] = df_lonsum['ANVENDELSE'].replace(mapping)
 
 df_materialer=df_materialer.loc[df_materialer['ANVENDELSE'].isin(brancher)]
@@ -43,14 +48,12 @@ df_materialer_MD=df_materialer_MD.loc[df_materialer_MD['TID']!=1966].copy()
 df_materialer_MF=df_materialer.loc[(df_materialer['TILGANG1']=='Import eksklusiv told')]
 df_materialer_MF=df_materialer_MF.loc[df_materialer_MF['TID']!=1966].copy()
 
-df_kapital=df_kapital.loc[(df_kapital['BEHOLD']=='AN.11 Faste aktiver, nettobeholdning ultimo året')]
 df_lonsom=df_lonsum.loc[(df_lonsum['TILGANG1']=='Aflønning af ansatte')].copy()
 
 #fjern prishenhed
 df_materialer_MD.drop(columns=['TILGANG1'],inplace=True)
 df_materialer_MF.drop(columns=['TILGANG1'],inplace=True)
 
-df_kapital.drop(columns=['BEHOLD'],inplace=True)
 df_lonsom.drop(columns=['TILGANG1'],inplace=True)
 
 #set index lidt besværligt men der skal lige ryddes op
@@ -66,6 +69,11 @@ df_materialer_MD_lob.set_index(['TILGANG2', 'ANVENDELSE', 'TID'],inplace=True)
 df_materialer_MF_lob.set_index(['TILGANG2', 'ANVENDELSE', 'TID'],inplace=True)
 df_materialer_MD_for.set_index(['TILGANG2', 'ANVENDELSE', 'TID'],inplace=True)
 df_materialer_MF_for.set_index(['TILGANG2', 'ANVENDELSE', 'TID'],inplace=True)
+# %%
+df_materialer_MD_lob.sort_index(inplace=True)
+df_materialer_MF_lob.sort_index(inplace=True)
+df_materialer_MD_for.sort_index(inplace=True)
+df_materialer_MF_for.sort_index(inplace=True)
 
 # df_kapital_lob=df_kapital.loc[(df_kapital['PRISENHED']=='Løbende priser')].copy()
 df_lonsom_lob=df_lonsom.loc[(df_lonsom['PRISENHED']=='Løbende priser')].copy()
@@ -76,11 +84,15 @@ df_lonsom_lob.drop(columns=['PRISENHED'],inplace=True)
 # df_kapital_lob.set_index(['BRANCHE', 'TID'],inplace=True)
 # df_kapital_lob.rename_axis(index={'BRANCHE': 'ANVENDELSE'}, inplace=True)
 df_lonsom_lob.set_index(['ANVENDELSE', 'TID'],inplace=True)
-df_kapital.set_index(['BRANCHE', 'TID'],inplace=True)
-df_kapital.rename_axis(index={'BRANCHE': 'ANVENDELSE'}, inplace=True)
+df_lonsom_lob.sort_index(inplace=True)
+df_kapital.set_index(['ANVENDELSE', 'TID'],inplace=True)
+df_kapital.sort_index(inplace=True)
 df_timer.set_index(['ANVENDELSE', 'TID'],inplace=True)
+df_timer.sort_index(inplace=True)
 df_timeLon.set_index(['ANVENDELSE', 'TID'],inplace=True)
+df_timeLon.sort_index(inplace=True)
 df_kapital_pris.set_index(['ANVENDELSE', 'TID'],inplace=True)
+df_kapital_pris.sort_index(inplace=True)
 
 df_tau_MD.set_index([ 'ANVENDELSE', 'TID'],inplace=True)
 df_tau_MF.set_index(['TILGANG2', 'ANVENDELSE', 'TID'],inplace=True)
@@ -340,7 +352,7 @@ df_Xt_Mit = df_Xt_Mit.reset_index()
 
 # Beregn aggregater
 k_prev=df_kapital.groupby(level=['ANVENDELSE'])['Xt'].shift(1)
-df_KL_aggregat_l=df_lonsom_lob['INDHOLD']+k_prev*df_kapital_pris['Pt']
+df_KL_aggregat_l = df_timeLon['TIMELOEN_KR'] * df_timer['TIMER'] / 1000 + k_prev * df_kapital_pris['Pt']
 df_KL_aggregat_lobende = df_KL_aggregat_l.reset_index(name='INDHOLD')
 
 lon_prev = df_timeLon.groupby(level=['ANVENDELSE'])['TIMELOEN_KR'].shift(1)
@@ -397,13 +409,13 @@ df_Xt_KLit = df_Xt_KLit.reset_index()
 ##################################################################################################
 
 # Beregn aggregater
-J_prev=df_jord['Xt'].shift(1)
-df_JKL_aggregat_l=df_KL_aggregat_l+J_prev*df_jord_pris['Pt']*0.05
+J_prev=df_jord['INDHOLD'].shift(1)
+df_JKL_aggregat_l=df_KL_aggregat_l+J_prev*df_jord_pris['Pt']
 df_JKL_aggregat_lobende = df_JKL_aggregat_l.reset_index(name='INDHOLD')
 
 jord_pris_prev = df_jord_pris['Pt'].shift(1)
 
-df_JKL_aggregat_f=df_KL_aggregat_f+J_prev*jord_pris_prev*0.05
+df_JKL_aggregat_f=df_KL_aggregat_f+J_prev*jord_pris_prev
 df_JKL_aggregat_for = df_JKL_aggregat_f.reset_index(name='INDHOLD')
 #set index
 df_JKL_aggregat_lobende.set_index(['ANVENDELSE', 'TID'],inplace=True)
@@ -469,7 +481,7 @@ df_master_aggregater = df_Pt_Mit.rename(columns={'Pt': 'P_Mtot'}).join([
 ])
 
 # Gem Niveau 2 filen
-df_master_aggregater.to_csv('Data/Nationalregnskab/Data69/Aggregater_KL_M.csv')
+df_master_aggregater.to_csv('../Nationalregnskab_117/Data117/Aggregater_KL_M.csv')
 
 
 # --- MASTER-FIL 2: VAREGRUPPER (Niveau 1) ---
@@ -479,4 +491,4 @@ df_master_varegrupper = df_Pt_Mjit.rename(columns={'Pt': 'P_M'}).join([
 ])
 
 # Gem Niveau 1 filen
-df_master_varegrupper.to_csv('Data/Nationalregnskab/Data69/Aggregater_Mjit.csv')
+df_master_varegrupper.to_csv('../Nationalregnskab_117/Data117/Aggregater_Mjit.csv')

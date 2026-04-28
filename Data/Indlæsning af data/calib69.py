@@ -27,21 +27,66 @@ EM_map = {
 EM = pd.Series(EM_map)     # substitution import/domestic
 EM.index.name = j
 EKL=0.4    # substitution K-L
-# EJKL   # substitution J-KL (kun landbrug)
+EJKL=0   # substitution J-KL (kun landbrug)
 
 # Beregn afskrivningsraten
 K_prev = df.K.groupby('ANVENDELSE')['Xt'].shift(1)
 delta = (K_prev - df.K['Xt'] + df.I['Xt']) / K_prev
 delta.index.names = [i, t]
-
+################################################################################
 # Beregn usercost of capital
+################################################################################
 df.P_I.index.names = [i, t]
-P_K=(r+delta)*df.P_I['Pt']
+# P_K=(r+delta)*df.P_I['Pt']
+# P_K_final = P_K.reset_index(name='Pt')
+# P_K_final.to_csv('../Nationalregnskab/Data69/P_K.csv', index=False)
+# Beregn først Ektax
+EKtax_lan=df.tCorp['Pt'].loc['01000']*df.rTaxDep.loc['lan', :]/(r.loc['01000']+df.rTaxDep.loc['lan', :])
+EKtax_fre=df.tCorp['Pt'].loc['10120']*df.rTaxDep.loc['fre', :]/(r.loc['10120']+df.rTaxDep.loc['fre', :])
+EKtax_rest=df.tCorp['Pt'].loc['REST']*df.rTaxDep_rest/(r.loc['REST']+df.rTaxDep_rest)
+# Giv dem samme indeksnavn (tid)
+EKtax_lan.index.name = t
+EKtax_fre.index.name = t
+EKtax_rest.index.name = t
+# Lav MultiIndex med branche + tid
+EKtax_lan.index  = pd.MultiIndex.from_product([['01000'], EKtax_lan.index], names=[i, t])
+EKtax_fre.index  = pd.MultiIndex.from_product([['10120'], EKtax_fre.index], names=[i, t])
+EKtax_rest.index = pd.MultiIndex.from_product([['REST'],  EKtax_rest.index], names=[i, t])
+# Saml til én variabel
+EKtax = pd.concat([EKtax_lan, EKtax_fre, EKtax_rest]).sort_index()
+EKtax.index.names = [i, t]
+EKtax_prev=EKtax.groupby('ANVENDELSE').shift(1)
+# # Beregn pTobinsQ
+# pTobinsQ=df.P_I['Pt']-df.P_I['Pt']*EKtax
+# # Variable der skal lagges
+# pTobinsQ_prev=pTobinsQ.groupby('ANVENDELSE').shift(1)
+P_I_prev=df.P_I.groupby('ANVENDELSE').shift(1)
+################################################################################
+# Beregn usercost
+################################################################################
+# P_K=(pTobinsQ_prev*(1+r) -(1-delta)*pTobinsQ  -((r-df.rBonds['Pt']*(1-df.tCorp['Pt']))*0.6*P_I_prev['Pt']))/(1-df.tCorp['Pt'])
+# Faktisk inflation: pi_t = P_I_t / P_I_{t-1}
+inf = df.P_I['Pt'] / P_I_prev['Pt']
+
+gamma = 0.6
+E_inf = inf.copy()
+E_inf.loc[pd.IndexSlice[:, :1993]] = np.nan
+for anv, s in inf.groupby(level='ANVENDELSE'):
+    if (anv, 1994) not in inf.index:
+        continue
+    E_inf.loc[(anv, 1994)] = inf.loc[(anv, 1994)]
+    years = [year for year in s.index.get_level_values('TID') if year >= 1995]
+    for year in years:
+        E_inf.loc[(anv, year)] = gamma * E_inf.loc[(anv, year - 1)] + (1 - gamma) * inf.loc[(anv, year)]
+
+# P_K=(1+r)*P_I_prev['Pt']-(1-delta)*P_I_prev['Pt']*E_inf-(r-df.rBonds['Pt'])*0.6*P_I_prev['Pt']
+P_K=((1+r)*(P_I_prev['Pt']-P_I_prev['Pt']*EKtax_prev)-(1-delta)*(P_I_prev['Pt']-P_I_prev['Pt']*EKtax)*E_inf -((r-df.rBonds['Pt']*(1-df.tCorp['Pt']))*0.6*P_I_prev['Pt']))/(1-df.tCorp['Pt'])
 P_K_final = P_K.reset_index(name='Pt')
 P_K_final.to_csv('../Nationalregnskab/Data69/P_K.csv', index=False)
 
+
 # Bestem først samlet dansk produktion ved at summe over tilgang i M_D
-M_D_tot = df.M_D_loebende.groupby([i,t]).sum()
+M_D_tot = df.M_D_loebende.groupby(['ANVENDELSE', 'TID']).sum()
 M_D_tot.index.names = [i, t]
 
 # Beregn afgiftsats
@@ -80,9 +125,39 @@ Res = (df.P['Pt'].loc['01000', :] * df.Y['Xt'].loc['01000', :]
        - df.w['Pt'].loc['01000', :] * df.L['Xt'].loc['01000', :]
        - P_K.loc['01000', :] * K_prev.loc['01000', :])
 
+################################################################################
+# Beregn jordomkostninger
+################################################################################
 #For landbrug specifikt
-P_J=r.loc['01000']*df.P_Jord['Pt']
+P_Jord_prev=df.P_Jord.shift(1)
+P_Jord_2022=df.P_Jord.loc[ 2022]
+P_Jord_1982=df.P_Jord.loc[1982]
+inf_J=(P_Jord_2022/P_Jord_1982)**(1/(2022-1982))
+
+# Støtte per hektar (løbende priser per hektar)
+s_hektar = df.hektarstotte['INDHOLD'] / df.J['Xt'].loc['01000']
+s_hektar.index.name = t
+grundskyld_korr = df.grundskyld['INDHOLD'].copy()
+grundskyld_korr.loc[grundskyld_korr.index >= 2009] = grundskyld_korr.loc[grundskyld_korr.index >= 2009] / 1.349
+grundskyld_hektar = grundskyld_korr / df.J['Xt'].loc['01000']
+# Justeret usercost på jord
+# P_J = ((1 + r.loc['01000']) * P_Jord_prev['Pt']
+#        - P_Jord_prev['Pt'] * inf_Jord['Pt']
+#        - (r.loc['01000'] - df.rBonds['Pt'].loc['01000']) * 0.6 * P_Jord_prev['Pt']
+#        - s_hektar)
+pLandvalueFromUnobserved = (0.65 + (0.314120387591655 + 0.194457) + 0.145853948392634 + (0.783923 - 0.338))*1000
+
+P_J=((((1+r.loc['01000'])*P_Jord_prev['Pt']-P_Jord_prev['Pt']*inf_J['Pt'])
+    -((r.loc['01000']-df.rBonds['Pt'].loc['01000']*(1-df.tCorp['Pt'].loc['01000']))*0.6*P_Jord_prev['Pt']))
+    /(1-df.tCorp['Pt'].loc['01000'])
+    -s_hektar+grundskyld_hektar)
+
+
+# P_J=r.loc['01000']*df.P_Jord['Pt']
 P_J.index.names = [t]
+P_J_final = P_J.reset_index(name='Pt')
+P_J_final.to_csv('../Nationalregnskab/Data69/P_J.csv', index=False)
+
 J_prev=df.J.groupby('ANVENDELSE')['Xt'].shift(1)
 PxJ=P_J*J_prev.loc['01000']  
 
@@ -119,20 +194,39 @@ P_O = P_O_landbrug(P_MxM_tot, P_KLxKL, PxJ, df)
 subs_adj = df.subsidier['INDHOLD'].copy()
 landbrug_mask = subs_adj.index.get_level_values('ANVENDELSE') == '01000'
 tid_mask = subs_adj.index.get_level_values('TID') >= 2005
+tid_grundskyld = subs_adj.index.get_level_values('TID') >= 2009
 mask = landbrug_mask & tid_mask
+mask_grundskyld = landbrug_mask & tid_grundskyld
 tid_values = subs_adj.index.get_level_values('TID')[mask]
+tid_values_grundskyld = subs_adj.index.get_level_values('TID')[mask_grundskyld]
 hektarstotte_reindexed = df.hektarstotte['INDHOLD'].reindex(tid_values, fill_value=0)
+grundskyld_reindexed = df.grundskyld['INDHOLD'].reindex(tid_values_grundskyld, fill_value=0)
 # Træk hektarstøtte fra
 subs_adj.loc[mask] = subs_adj.loc[mask] + hektarstotte_reindexed.values
-tau_Y = subs_adj / (df.Y_lob['INDHOLD'] - subs_adj)
+subs_adj.loc[mask_grundskyld] = subs_adj.loc[mask_grundskyld] - 0.349*grundskyld_reindexed.values
 
+tau_Y = subs_adj / (df.Y_lob['INDHOLD'] - subs_adj)
 #Beregn markup
 markup=df.P['Pt']/((1+tau_Y)*P_O)-1
 
 #Øverste CES
 mu_Y_Mtot = (df.Mtot['Xt'] / df.Y['Xt']) * (df.P_Mtot['Pt'] / P_O)**EY
-mu_Y_KL   = (df.KL['Xt']       / df.Y['Xt']) * (df.P_KL['Pt']     / P_O)**EY
+mu_Y_KL   = (df.KL['Xt'] / df.Y['Xt']) * (df.P_KL['Pt'] / P_O)**EY
 mu_Y_KL.index.names = [i, t]
+mu_Y_Mtot.index.names = [i, t]
+
+# JKL erstatter KL for landbrug i øverste CES
+mu_Y_JKL = mu_Y_KL.copy()
+mask_01000 = mu_Y_JKL.index.get_level_values('ANVENDELSE') == '01000'
+tid_01000 = mu_Y_JKL.loc[mask_01000].index.get_level_values('TID')
+
+jkl_reindexed   = df.JKL['Xt'].loc['01000'].reindex(tid_01000)
+y_reindexed     = df.Y['Xt'].loc['01000'].reindex(tid_01000)
+p_jkl_reindexed = df.P_JKL['Pt'].loc['01000'].reindex(tid_01000)
+p_o_reindexed   = P_O.loc['01000'].reindex(tid_01000)
+
+mu_Y_JKL.loc[mask_01000] = (jkl_reindexed.values / y_reindexed.values) * (p_jkl_reindexed.values / p_o_reindexed.values)**EY
+mu_Y_JKL.index.names = [i, t]
 mu_Y_Mtot.index.names = [i, t]
 
 # Materiale niveau
@@ -165,22 +259,31 @@ mu_MF = (df.M_F['Xt'] / df.M['Xt']) * (((1 + df.tau_MF['tau']) * df.P_F['Pt']) /
 mu_MD.index.names = [i, j, t]
 mu_MF.index.names = [i, j, t]
 
+mu_JKL_J  = (J_prev.loc['01000'] / df.JKL['Xt'].loc['01000']) * (P_J / df.P_JKL['Pt'].loc['01000'])**EJKL
+mu_JKL_KL = (df.KL['Xt'].loc['01000'] / df.JKL['Xt'].loc['01000']) * (df.P_KL['Pt'].loc['01000'] / df.P_JKL['Pt'].loc['01000'])**EJKL
+mu_JKL_J.index  = pd.MultiIndex.from_product([['01000'], mu_JKL_J.index],  names=[i, t])
+mu_JKL_KL.index = pd.MultiIndex.from_product([['01000'], mu_JKL_KL.index], names=[i, t])
 # KL niveau
 mu_KL_K = (K_prev/ df.KL['Xt']) * (P_K/ df.P_KL['Pt'])**EKL
 mu_KL_L = ((df.L['Xt']) / df.KL['Xt']) * (df.w['Pt'] / df.P_KL['Pt'])**EKL
 
 # Beregn thetaer
 theta_Y_KL=mu_Y_KL**(1/(EY-1))
+theta_Y_JKL=mu_Y_JKL**(1/(EY-1))
 theta_Y_Mtot=mu_Y_Mtot**(1/(EY-1))
 theta_Mtot_M=mu_Mtot_M**(1/(EMtot-1))
 theta_MD=mu_MD**(1/(EM-1))
 theta_MF=mu_MF**(1/(EM-1))
 theta_KL_K=mu_KL_K**(1/(EKL-1))
 theta_KL_L=mu_KL_L**(1/(EKL-1))
+theta_JKL_J  = mu_JKL_J**(1/(EJKL-1))
+theta_JKL_KL = mu_JKL_KL**(1/(EJKL-1))
 
 # thetaer indekseret til 1994=1
 theta_Y_KL_1994= theta_Y_KL.xs(1994, level='TID')
 theta_Y_KL_indeks=theta_Y_KL/theta_Y_KL_1994
+theta_Y_JKL_1994= theta_Y_JKL.xs(1994, level='TID')
+theta_Y_JKL_indeks=theta_Y_JKL/theta_Y_JKL_1994
 theta_Y_Mtot_1994=theta_Y_Mtot.xs(1994, level='TID')
 theta_Y_Mtot_indeks=theta_Y_Mtot/theta_Y_Mtot_1994
 theta_Mtot_M_1994=theta_Mtot_M.xs(1994, level='TID')
@@ -193,4 +296,6 @@ theta_KL_K_1994=theta_KL_K.xs(1994, level='TID')
 theta_KL_K_indeks=theta_KL_K/theta_KL_K_1994
 theta_KL_L_1994=theta_KL_L.xs(1994, level='TID')
 theta_KL_L_indeks=theta_KL_L/theta_KL_L_1994
+theta_JKL_J_indeks  = theta_JKL_J  / theta_JKL_J.xs(1994, level='TID')
+theta_JKL_KL_indeks = theta_JKL_KL / theta_JKL_KL.xs(1994, level='TID')
 

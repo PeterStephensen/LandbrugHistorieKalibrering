@@ -71,7 +71,7 @@ if __name__ == "__main__":
     brancher = ["Landbrug", "Fødevareindustri"]
 
     import pandas as pd
-    d = df.Y['Xt'].loc[(slice(None), slice(1994, 2022))]*df.P['Pt'].loc[(slice(None), slice(1994, 2022))]
+    d = df.Y['Xt'].loc[(slice(None), slice(1993, 2022))]*df.P['Pt'].loc[(slice(None), slice(1994, 2022))]
     d_wide = d.unstack('ANVENDELSE').sort_index()
     d_wide = d_wide.drop(columns=['REST'])
     d_wide.columns = brancher  # sætter "Landbrug" og "Fødevareindustri"
@@ -90,7 +90,7 @@ if __name__ == "__main__":
     brancher = ["Landbrug", "Fødevareindustri", "Resten af økonomien"]
 
     import pandas as pd
-    d =df.K['Xt'].loc[(slice(None), slice(1994, 2022))]/ df.Y['Xt'].loc[(slice(None), slice(1994, 2022))]
+    d =df.K['Xt'].loc[(slice(None), slice(1993, 2022))]/ df.Y['Xt'].loc[(slice(None), slice(1994, 2022))]
     d_wide = d.unstack('ANVENDELSE').sort_index()
     d_wide.columns = brancher  # sætter "Landbrug" og "Fødevareindustri"
     d_wide.index.name = "År"
@@ -108,7 +108,7 @@ if __name__ == "__main__":
     brancher = ["Landbrug", "Fødevareindustri", "Resten af økonomien"]
 
     import pandas as pd
-    d =df.L['Xt'].loc[(slice(None), slice(1994, 2022))]/ df.Y['Xt'].loc[(slice(None), slice(1994, 2022))]
+    d =df.L['Xt'].loc[(slice(None), slice(1993, 2022))]/ df.Y['Xt'].loc[(slice(None), slice(1994, 2022))]
     d_wide = d.unstack('ANVENDELSE').sort_index()
     d_wide.columns = brancher  # sætter "Landbrug" og "Fødevareindustri"
     d_wide.index.name = "År"
@@ -126,7 +126,7 @@ if __name__ == "__main__":
     brancher = ["Landbrug", "Fødevareindustri", "Resten af økonomien"]
 
     import pandas as pd
-    d = df.K['Xt'].loc[(slice(None), slice(1994, 2022))] / df.L['Xt'].loc[(slice(None), slice(1994, 2022))]    
+    d = df.K['Xt'].loc[(slice(None), slice(1993, 2022))] / df.L['Xt'].loc[(slice(None), slice(1994, 2022))]    
     d_wide = d.unstack('ANVENDELSE').sort_index()
     d_wide.columns = brancher  # sætter "Landbrug" og "Fødevareindustri"
     d_wide.index.name = "År"
@@ -144,7 +144,7 @@ if __name__ == "__main__":
     brancher = ["Landbrug", "Fødevareindustri", "Resten af økonomien"]
 
     import pandas as pd
-    d =df.Mtot['Xt'].loc[(slice(None), slice(1994, 2022))]/ df.Y['Xt'].loc[(slice(None), slice(1994, 2022))]
+    d =df.Mtot['Xt'].loc[(slice(None), slice(1993, 2022))]/ df.Y['Xt'].loc[(slice(None), slice(1994, 2022))]
     d_wide = d.unstack('ANVENDELSE').sort_index()
     d_wide.columns = brancher  # sætter "Landbrug" og "Fødevareindustri"
     d_wide.index.name = "År"
